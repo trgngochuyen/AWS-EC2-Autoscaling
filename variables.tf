@@ -27,3 +27,19 @@ variable "ec2_instance_type" {
   description = "Instance type of EC2 cluster"
   default     = "t2.micro"
 }
+
+variable "cluster_max_size" {
+  description = "Maximum size of cluster"
+  default     = 3
+}
+
+variable "cluster_min_size" {
+  description = "Minimum size of cluster"
+  default     = 1
+}
+
+variable "cluster_desired_size" {
+  description = "Desired size of cluster"
+  default     = 2
+}
+
