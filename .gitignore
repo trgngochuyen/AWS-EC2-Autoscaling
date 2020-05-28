@@ -1,0 +1,12 @@
+# .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+# ssh keys
+*.key
