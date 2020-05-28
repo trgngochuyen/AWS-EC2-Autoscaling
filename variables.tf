@@ -43,3 +43,9 @@ variable "cluster_desired_size" {
   default     = 2
 }
 
+variable "vpc_cidr" {
+  description = "CIDR for the main VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
