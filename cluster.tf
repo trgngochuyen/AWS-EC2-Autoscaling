@@ -69,3 +69,80 @@ resource "aws_lb" "webserver" {
     }
   )
 }
+
+resource "aws_lb_target_group" "webserver" {
+  count    = var.ec2_enable_cluster ? 1 : 0
+  name     = "${var.project}-webserver"
+  vpc_id   = aws_vpc.this.id
+  port     = var.ec2_server_port
+  protocol = "HTTP"
+}
+
+resource "aws_lb_listener" "webserver" {
+  count             = var.ec2_enable_cluster ? 1 : 0
+  load_balancer_arn = aws_lb.webserver[0].arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.webserver[0].arn
+  }
+}
+
+resource "aws_autoscaling_policy" "webserver-scale-up" {
+  count                  = var.ec2_enable_cluster ? 1 : 0
+  name                   = "${var.project}-webserver-scale-up"
+  scaling_adjustment     = 1                  // number of instances by which to scale
+  adjustment_type        = "ChangeInCapacity" // specifies whether the adjustment is an absolute number or a percentage of the current capacity
+  cooldown               = 60                 // seconds, after a scaling activity completes & before the next scaling activity can start
+  autoscaling_group_name = aws_autoscaling_group.webserver[0].name
+}
+
+resource "aws_autoscaling_policy" "webserver-scale-down" {
+  count                  = var.ec2_enable_cluster ? 1 : 0
+  name                   = "${var.project}-webserver-scale-down"
+  scaling_adjustment     = -1
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 60
+  autoscaling_group_name = aws_autoscaling_group.webserver[0].name
+}
+
+resource "aws_cloudwatch_metric_alarm" "webserver-cpu-high" {
+  count               = var.ec2_enable_cluster ? 1 : 0
+  alarm_name          = "${var.project}-webserver-cpu-high" // must be unique within the user's AWS account
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2                // number of periods over which data is compared to the specified threshold. M out of N, M is datapoints_to_alarm, N is evaluation_periods
+  metric_name         = "CPUUtilization" // other metrics in AWS/EC2 namespace: DiskReadOps, DiskWriteOps, DiskReadBytes,...
+  namespace           = "AWS/EC2"        // namespace for the alarm's associated metric
+  period              = 60               // seconds, over which the specified statistic is applied
+  statistic           = "Average"        // also SampleCount, Sum, Minimum, Maximum
+  threshold           = 80               // value against which the specified statistic is compared
+  alarm_actions = [
+    aws_autoscaling_policy.webserver-scale-up[0].arn
+  ] // list of actions to execute when this alarm transitions into an ALARM state from any other state. Specified as an ARN.
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.webserver[0].name
+  } // the dimensions for the alarm's associated metric
+}
+
+resource "aws_cloudwatch_metric_alarm" "webserver-cpu-low" {
+  count               = var.ec2_enable_cluster ? 1 : 0
+  alarm_name          = "${var.project}-webserver-cpu-low"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 40
+  alarm_actions = [
+    aws_autoscaling_policy.webserver-scale-down[0].arn
+  ]
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.webserver[0].name
+  }
+}
+
+output "load_balancer_dns" {
+  value = aws_lb.webserver.*.dns_name
+}

@@ -15,6 +15,8 @@ resource "aws_instance" "webserver" {
     aws_security_group.webserver.id
   ]
 
+  associate_public_ip_address = true
+
   tags = merge(
     local.common_tags,
     {

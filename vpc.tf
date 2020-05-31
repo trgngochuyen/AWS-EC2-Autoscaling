@@ -84,6 +84,8 @@ resource "aws_route_table" "private" {
   )
 }
 
+// Provides a resource to create an association between a route table and
+// a subnet or a route table and an internet gateway or virtual private gateway
 resource "aws_route_table_association" "private" {
   count          = 2
   subnet_id      = aws_subnet.private[count.index].id

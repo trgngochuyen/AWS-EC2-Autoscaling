@@ -10,3 +10,6 @@
 
 # ssh keys
 *.key
+
+# git
+.gitignore

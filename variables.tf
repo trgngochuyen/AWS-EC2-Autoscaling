@@ -20,12 +20,12 @@ variable "aws_secret_key" {
 
 variable "ec2_enable_cluster" {
   description = "Enable EC2 cluster"
-  default     = "false"
+  default     = "true"
 }
 
 variable "ec2_instance_type" {
   description = "Instance type of EC2 cluster"
-  default     = "t2.micro"
+  default     = "t2.small"
 }
 
 variable "cluster_max_size" {
@@ -49,3 +49,25 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
+variable "public_subnet_cidrs" {
+  description = "CIDRs for public subnets"
+  type        = list(string)
+  default = [
+    "10.0.1.0/24",
+    "10.0.2.0/24"
+  ]
+}
+
+variable "private_subnet_cidrs" {
+  description = "CIDRs for private subnets"
+  type        = list(string)
+  default = [
+    "10.0.3.0/24",
+    "10.0.4.0/24"
+  ]
+}
+
+variable "ec2_server_port" {
+  description = "HTTP port exposed on EC2 instance"
+  default     = 80
+}
