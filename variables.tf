@@ -11,16 +11,9 @@ variable "aws_region" {
   description = "AWS region where instance resides in"
 }
 
-variable "aws_access_id" {
-  description = "AWS access ID"
-}
-variable "aws_secret_key" {
-  description = "AWS secret key"
-}
-
 variable "ec2_enable_cluster" {
   description = "Enable EC2 cluster"
-  default     = "true"
+  default     = false
 }
 
 variable "ec2_instance_type" {
@@ -40,7 +33,7 @@ variable "cluster_min_size" {
 
 variable "cluster_desired_size" {
   description = "Desired size of cluster"
-  default     = 2
+  default     = 1
 }
 
 variable "vpc_cidr" {
@@ -69,5 +62,5 @@ variable "private_subnet_cidrs" {
 
 variable "ec2_server_port" {
   description = "HTTP port exposed on EC2 instance"
-  default     = 80
+  default     = 8080
 }

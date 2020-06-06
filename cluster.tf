@@ -4,8 +4,8 @@ resource "aws_launch_configuration" "webserver" {
   image_id      = data.aws_ami.ubuntu-18_04.id
   instance_type = var.ec2_instance_type
 
-  key_name = aws_key_pair.this.key_name
-
+  key_name                    = aws_key_pair.this.key_name
+  associate_public_ip_address = true
   security_groups = [
     aws_security_group.webserver.id
   ]
@@ -64,8 +64,8 @@ resource "aws_lb" "webserver" {
   tags = merge(
     local.common_tags,
     {
-      Name = "${var.project}-webserver"
-      Type = "ALB"
+      "Name" = "${var.project}-webserver"
+      "Type" = "ALB"
     }
   )
 }
@@ -109,20 +109,20 @@ resource "aws_autoscaling_policy" "webserver-scale-down" {
 
 resource "aws_cloudwatch_metric_alarm" "webserver-cpu-high" {
   count               = var.ec2_enable_cluster ? 1 : 0
-  alarm_name          = "${var.project}-webserver-cpu-high" // must be unique within the user's AWS account
+  alarm_name          = "${var.project}-webserver-cpu-high"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = 2                // number of periods over which data is compared to the specified threshold. M out of N, M is datapoints_to_alarm, N is evaluation_periods
-  metric_name         = "CPUUtilization" // other metrics in AWS/EC2 namespace: DiskReadOps, DiskWriteOps, DiskReadBytes,...
-  namespace           = "AWS/EC2"        // namespace for the alarm's associated metric
-  period              = 60               // seconds, over which the specified statistic is applied
-  statistic           = "Average"        // also SampleCount, Sum, Minimum, Maximum
-  threshold           = 80               // value against which the specified statistic is compared
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 80
   alarm_actions = [
     aws_autoscaling_policy.webserver-scale-up[0].arn
-  ] // list of actions to execute when this alarm transitions into an ALARM state from any other state. Specified as an ARN.
+  ]
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.webserver[0].name
-  } // the dimensions for the alarm's associated metric
+  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "webserver-cpu-low" {

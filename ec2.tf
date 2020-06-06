@@ -41,7 +41,7 @@ resource "null_resource" "provisioner" {
   }
   provisioner "file" {
     source      = "provision/webserver"
-    destination = "/home/ubuntu"
+    destination = "/home/ubuntu/"
   }
   provisioner "remote-exec" {
     script = "provision/server-init.sh"
